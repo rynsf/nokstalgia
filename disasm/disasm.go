@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
+
+var out io.Writer = os.Stdout
 
 /*
 function: bytesToHalfword
@@ -58,26 +61,29 @@ func disassembler(pc int, codebuffer []byte) {
 		opBytes := getBitsRange(instruction, 11, 12)
 		switch opBytes {
 		case 0: // lsl
-			fmt.Print("lsl")
+			offset5 := getBitsRange(instruction, 6, 10)
+			rs := getBitsRange(instruction, 3, 5)
+			rd := getBitsRange(instruction, 0, 2)
+			fmt.Fprintf(out, "LSL R%d, R%d, #%d", rd, rs, offset5)
 		case 1: // lsr
-			fmt.Print("lsr")
+			fmt.Fprint(out, "lsr")
 		case 2: //asr
-			fmt.Print("asr")
+			fmt.Fprint(out, "asr")
 		case 3: // add/sub
-			fmt.Print("add/sub")
+			fmt.Fprint(out, "add/sub")
 		}
 
 	case 1: // move/compare/add/sub immediate
 		opBytes := getBitsRange(instruction, 11, 12)
 		switch opBytes {
 		case 0:
-			fmt.Print("mov")
+			fmt.Fprint(out, "mov")
 		case 1:
-			fmt.Print("cmp")
+			fmt.Fprint(out, "cmp")
 		case 2:
-			fmt.Print("add")
+			fmt.Fprint(out, "add")
 		case 3:
-			fmt.Print("sub")
+			fmt.Fprint(out, "sub")
 		}
 
 	case 2: // alu operations / high register operation / branch exchange / pc relative load / load / store with register offset / load store sign extended byte/halfword
@@ -87,46 +93,46 @@ func disassembler(pc int, codebuffer []byte) {
 			bit10 := getBitsRange(instruction, 10, 10)
 			switch bit10 {
 			case 0: // alu operation
-				fmt.Print("alu op")
+				fmt.Fprint(out, "alu op")
 			case 1: // high register operation/ branch exchange
-				fmt.Print("hi reg")
+				fmt.Fprint(out, "hi reg")
 			}
 		case 1: // pc relative laod
-			fmt.Print("PC relative load")
+			fmt.Fprint(out, "PC relative load")
 		case 2, 3: // load/store with regiter offset & load/store sign-extended byte/halfword
 			bit9 := getBitsRange(instruction, 9, 9)
 			switch bit9 {
 			case 0: // load/store with regiter offset
-				fmt.Print("load/store with regiter offset")
+				fmt.Fprint(out, "load/store with regiter offset")
 			case 1: // load/store sign-extended byte/halfword
-				fmt.Print("load/store sign-extended byte/halfword")
+				fmt.Fprint(out, "load/store sign-extended byte/halfword")
 			}
 		}
 
 	case 3: // load/store with immediate offset
-		fmt.Print("load/store with immediate offset")
+		fmt.Fprint(out, "load/store with immediate offset")
 
 	case 4: // load/store half word & sp relative load store
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // load/store half word
-			fmt.Print("load/store half word")
+			fmt.Fprint(out, "load/store half word")
 		case 1: // sp relative load/store
-			fmt.Print("sp relative load/store")
+			fmt.Fprint(out, "sp relative load/store")
 		}
 
 	case 5:
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // load address
-			fmt.Print("load address")
+			fmt.Fprint(out, "load address")
 		case 1: // add offset to stack pointer & push/pop register
 			bit10 := getBitsRange(instruction, 10, 10)
 			switch bit10 {
 			case 0: // add offest to stack pointer
-				fmt.Print("add offest to stack pointer")
+				fmt.Fprint(out, "add offest to stack pointer")
 			case 1: // push/pop register
-				fmt.Print("push/pop register")
+				fmt.Fprint(out, "push/pop register")
 			}
 		}
 
@@ -134,14 +140,14 @@ func disassembler(pc int, codebuffer []byte) {
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // multiple load/store
-			fmt.Print("multiple load/store")
+			fmt.Fprint(out, "multiple load/store")
 		case 1:
 			bitCond := getBitsRange(instruction, 8, 11)
 			switch bitCond {
 			case 15: // software interrupt
-				fmt.Print("software interrupt")
+				fmt.Fprint(out, "software interrupt")
 			default: // conditional branch
-				fmt.Print("conditional branch")
+				fmt.Fprint(out, "conditional branch")
 			}
 		}
 
@@ -149,9 +155,9 @@ func disassembler(pc int, codebuffer []byte) {
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // unconditional branch
-			fmt.Print("unconditional branch")
+			fmt.Fprint(out, "unconditional branch")
 		case 1: // long branch with link
-			fmt.Print("long branch with link")
+			fmt.Fprint(out, "long branch with link")
 		}
 	}
 	fmt.Println()
