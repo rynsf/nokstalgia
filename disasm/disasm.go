@@ -66,24 +66,52 @@ func disassembler(pc int, codebuffer []byte) {
 			rd := getBitsRange(instruction, 0, 2)
 			fmt.Fprintf(out, "LSL R%d, R%d, #%d", rd, rs, offset5)
 		case 1: // lsr
-			fmt.Fprint(out, "lsr")
+			offset5 := getBitsRange(instruction, 6, 10)
+			rs := getBitsRange(instruction, 3, 5)
+			rd := getBitsRange(instruction, 0, 2)
+			fmt.Fprintf(out, "LSR R%d, R%d, #%d", rd, rs, offset5)
 		case 2: //asr
-			fmt.Fprint(out, "asr")
+			offset5 := getBitsRange(instruction, 6, 10)
+			rs := getBitsRange(instruction, 3, 5)
+			rd := getBitsRange(instruction, 0, 2)
+			fmt.Fprintf(out, "ASR R%d, R%d, #%d", rd, rs, offset5)
 		case 3: // add/sub
-			fmt.Fprint(out, "add/sub")
+			immediateFlag := getBitsRange(instruction, 10, 10)
+			opcode := getBitsRange(instruction, 9, 9)
+			rn_offset3 := getBitsRange(instruction, 6, 8)
+			rs := getBitsRange(instruction, 3, 5)
+			rd := getBitsRange(instruction, 0, 2)
+			switch opcode {
+			case 0: // add
+				switch immediateFlag {
+				case 0: //register
+					fmt.Fprintf(out, "ADD R%d, R%d, R%d", rd, rs, rn_offset3)
+				case 1: // immediate
+					fmt.Fprintf(out, "ADD R%d, R%d, #%d", rd, rs, rn_offset3)
+				}
+			case 1: //sub
+				switch immediateFlag {
+				case 0: //register
+					fmt.Fprintf(out, "SUB R%d, R%d, R%d", rd, rs, rn_offset3)
+				case 1: // immediate
+					fmt.Fprintf(out, "SUB R%d, R%d, #%d", rd, rs, rn_offset3)
+				}
+			}
 		}
 
 	case 1: // move/compare/add/sub immediate
 		opBytes := getBitsRange(instruction, 11, 12)
+		rd := getBitsRange(instruction, 8, 10)
+		offset8 := getBitsRange(instruction, 0, 7)
 		switch opBytes {
-		case 0:
-			fmt.Fprint(out, "mov")
-		case 1:
-			fmt.Fprint(out, "cmp")
-		case 2:
-			fmt.Fprint(out, "add")
-		case 3:
-			fmt.Fprint(out, "sub")
+		case 0: // mov
+			fmt.Fprintf(out, "MOV R%d #%d", rd, offset8)
+		case 1: // cmp
+			fmt.Fprintf(out, "CMP R%d #%d", rd, offset8)
+		case 2: // add
+			fmt.Fprintf(out, "ADD R%d #%d", rd, offset8)
+		case 3: // sub
+			fmt.Fprintf(out, "SUB R%d #%d", rd, offset8)
 		}
 
 	case 2: // alu operations / high register operation / branch exchange / pc relative load / load / store with register offset / load store sign extended byte/halfword
@@ -93,32 +121,89 @@ func disassembler(pc int, codebuffer []byte) {
 			bit10 := getBitsRange(instruction, 10, 10)
 			switch bit10 {
 			case 0: // alu operation
-				fmt.Fprint(out, "alu op")
+				opcode := getBitsRange(instruction, 6, 9)
+				rs := getBitsRange(instruction, 3, 5)
+				rd := getBitsRange(instruction, 0, 2)
+				mnemonics := []string{"AND", "EOR", "LSL", "LSR", "ASR", "ADC", "SBC", "ROR", "TST", "NEG", "CMP", "CMN", "ORR", "MUL", "BIC", "MVN"}
+				fmt.Fprintf(out, "%s R%d R%d", mnemonics[opcode], rd, rs)
 			case 1: // high register operation/ branch exchange
-				fmt.Fprint(out, "hi reg")
+				opcode := getBitsRange(instruction, 8, 9)
+				h1 := getBitsRange(instruction, 7, 7)
+				h2 := getBitsRange(instruction, 6, 6)
+				rs := getBitsRange(instruction, 3, 5)
+				rd := getBitsRange(instruction, 0, 2)
+				h_r := []string{"R", "H"}
+				switch opcode {
+				case 0:
+					fmt.Fprintf(out, "ADD %s%d, %s%d", h_r[h1], rd, h_r[h2], rs)
+				case 1:
+					fmt.Fprintf(out, "CMP %s%d, %s%d", h_r[h1], rd, h_r[h2], rs)
+				case 2:
+					fmt.Fprintf(out, "MOV %s%d, %s%d", h_r[h1], rd, h_r[h2], rs)
+				case 3:
+					fmt.Fprintf(out, "BX %s%d", h_r[h2], rs)
+				}
 			}
 		case 1: // pc relative laod
-			fmt.Fprint(out, "PC relative load")
+			rd := getBitsRange(instruction, 8, 10)
+			word8 := getBitsRange(instruction, 0, 7)
+			fmt.Fprintf(out, "LDR R%d, [PC, #%d]", rd, word8)
 		case 2, 3: // load/store with regiter offset & load/store sign-extended byte/halfword
 			bit9 := getBitsRange(instruction, 9, 9)
 			switch bit9 {
 			case 0: // load/store with regiter offset
-				fmt.Fprint(out, "load/store with regiter offset")
+				lflag := getBitsRange(instruction, 11, 11)
+				bflag := getBitsRange(instruction, 10, 10)
+				ro := getBitsRange(instruction, 6, 8)
+				rb := getBitsRange(instruction, 3, 5)
+				rd := getBitsRange(instruction, 0, 2)
+				opcode := (lflag * 2) + bflag
+				mnemonics := []string{"STR", "STRB", "LDR", "LDRB"}
+				fmt.Fprintf(out, "%s R%d [R%d, R%d]", mnemonics[opcode], rd, rb, ro)
 			case 1: // load/store sign-extended byte/halfword
-				fmt.Fprint(out, "load/store sign-extended byte/halfword")
+				hflag := getBitsRange(instruction, 11, 11)
+				sflag := getBitsRange(instruction, 10, 10)
+				ro := getBitsRange(instruction, 6, 8)
+				rb := getBitsRange(instruction, 3, 5)
+				rd := getBitsRange(instruction, 0, 2)
+				opcode := (sflag * 2) + hflag
+				mnemonics := []string{"STRH", "LDRH", "LDSB", "LDSH"}
+				fmt.Fprintf(out, "%s R%d [R%d, R%d]", mnemonics[opcode], rd, rb, ro)
 			}
 		}
 
 	case 3: // load/store with immediate offset
-		fmt.Fprint(out, "load/store with immediate offset")
+		bflag := getBitsRange(instruction, 12, 12)
+		lflag := getBitsRange(instruction, 11, 11)
+		offset5 := getBitsRange(instruction, 6, 10)
+		offset := offset5
+		if bflag == 0 {
+			offset = offset5 << 2
+		}
+		rb := getBitsRange(instruction, 3, 5)
+		rd := getBitsRange(instruction, 0, 2)
+		mnemonics := []string{"STR", "LDR", "STRB", "LDRB"}
+		opcode := (lflag * 2) + bflag
+		fmt.Fprintf(out, "%s R%d, [R%d, #%d]", mnemonics[opcode], rd, rb, offset)
 
 	case 4: // load/store half word & sp relative load store
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // load/store half word
-			fmt.Fprint(out, "load/store half word")
+			lflag := getBitsRange(instruction, 11, 11)
+			offset5 := getBitsRange(instruction, 6, 10)
+			offset := offset5 << 1
+			rb := getBitsRange(instruction, 3, 5)
+			rd := getBitsRange(instruction, 0, 2)
+			mnemonic := []string{"STRH", "LDRH"}[lflag]
+			fmt.Fprintf(out, "%s R%d, [R%d, #%d]", mnemonic, rd, rb, offset)
 		case 1: // sp relative load/store
-			fmt.Fprint(out, "sp relative load/store")
+			lflag := getBitsRange(instruction, 11, 11)
+			rd := getBitsRange(instruction, 8, 10)
+			word8 := getBitsRange(instruction, 0, 7)
+			offset := word8 << 2
+			mnemonic := []string{"STR", "LDR"}[lflag]
+			fmt.Fprintf(out, "%s R%d, [SP, #%d]", mnemonic, rd, offset)
 		}
 
 	case 5:
