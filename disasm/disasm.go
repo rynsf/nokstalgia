@@ -8,6 +8,16 @@ import (
 
 var out io.Writer = os.Stdout
 
+// twosComplementToInt takes in bytes and the length of those bytes
+// and returns signed integer represented by the input.
+func twosComplementToInt(bytes uint32, bitLen int) int {
+	if bytes&(1<<(bitLen-1)) != 0 {
+		return int(bytes) - (1 << bitLen)
+	} else {
+		return int(bytes)
+	}
+}
+
 /*
 function: bytesToHalfword
 
@@ -50,12 +60,14 @@ parameter:
 
 	pc: index that points to the code to disassemble
 	codebuffer: byte slice of binary code to disassemble
+
+returns: the number of bytes read
 */
-func disassembler(pc int, codebuffer []byte) {
+func disassembler(pc int, codebuffer []byte) int {
 	instruction := bytesToHalfword(codebuffer[pc], codebuffer[pc+1])
 	first3Bit := getBitsRange(instruction, 13, 15)
-	fmt.Printf("0x%04X ", pc)
-	fmt.Printf("%04X ", instruction)
+	fmt.Fprintf(out, "0x%04X ", pc)
+	fmt.Fprintf(out, "0x%04X ", instruction)
 	switch first3Bit {
 	case 0: // move shifted register and add/substract
 		opBytes := getBitsRange(instruction, 11, 12)
@@ -182,7 +194,7 @@ func disassembler(pc int, codebuffer []byte) {
 		}
 		rb := getBitsRange(instruction, 3, 5)
 		rd := getBitsRange(instruction, 0, 2)
-		mnemonics := []string{"STR", "LDR", "STRB", "LDRB"}
+		mnemonics := []string{"STR", "STRB", "LDR", "LDRB"}
 		opcode := (lflag * 2) + bflag
 		fmt.Fprintf(out, "%s R%d, [R%d, #%d]", mnemonics[opcode], rd, rb, offset)
 
@@ -210,14 +222,44 @@ func disassembler(pc int, codebuffer []byte) {
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // load address
-			fmt.Fprint(out, "load address")
+			pc_sp := getBitsRange(instruction, 11, 11)
+			base := []string{"PC", "SP"}[pc_sp]
+			rd := getBitsRange(instruction, 8, 10)
+			word8 := getBitsRange(instruction, 0, 7)
+			offset := word8 << 2
+			fmt.Fprintf(out, "ADD R%d, %s, #%d", rd, base, offset)
 		case 1: // add offset to stack pointer & push/pop register
 			bit10 := getBitsRange(instruction, 10, 10)
 			switch bit10 {
 			case 0: // add offest to stack pointer
-				fmt.Fprint(out, "add offest to stack pointer")
+				signFlag := getBitsRange(instruction, 7, 7)
+				sign := []string{"", "-"}[signFlag]
+				sword7 := getBitsRange(instruction, 0, 6)
+				offset := sword7 << 2
+				fmt.Fprintf(out, "ADD SP, #%s%d", sign, offset)
 			case 1: // push/pop register
-				fmt.Fprint(out, "push/pop register")
+				lflag := getBitsRange(instruction, 11, 11)
+				rflag := getBitsRange(instruction, 8, 8)
+				rlist := getBitsRange(instruction, 0, 7)
+				opcode := (lflag * 2) + rflag
+				rlistStr := ""
+				sep := ""
+				for bitIndex := 0; bitIndex < 8; bitIndex++ {
+					if getBitsRange(rlist, bitIndex, bitIndex) == 1 {
+						rlistStr += fmt.Sprintf("%sR%d", sep, bitIndex)
+						sep = ", "
+					}
+				}
+				switch opcode {
+				case 0:
+					fmt.Fprintf(out, "PUSH { %s }", rlistStr)
+				case 1:
+					fmt.Fprintf(out, "PUSH { %s, LR }", rlistStr)
+				case 2:
+					fmt.Fprintf(out, "POP { %s }", rlistStr)
+				case 3:
+					fmt.Fprintf(out, "POP { %s, PC }", rlistStr)
+				}
 			}
 		}
 
@@ -225,14 +267,32 @@ func disassembler(pc int, codebuffer []byte) {
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // multiple load/store
-			fmt.Fprint(out, "multiple load/store")
+			lflag := getBitsRange(instruction, 11, 11)
+			rb := getBitsRange(instruction, 8, 10)
+			rlist := getBitsRange(instruction, 0, 7)
+			mnemonic := []string{"STMIA", "LDMIA"}[lflag]
+			rlistStr := ""
+			sep := ""
+			for bitIndex := 0; bitIndex < 8; bitIndex++ {
+				if getBitsRange(rlist, bitIndex, bitIndex) == 1 {
+					rlistStr += fmt.Sprintf("%sR%d", sep, bitIndex)
+					sep = ", "
+				}
+			}
+			fmt.Fprintf(out, "%s R%d!, { %s }", mnemonic, rb, rlistStr)
 		case 1:
 			bitCond := getBitsRange(instruction, 8, 11)
 			switch bitCond {
 			case 15: // software interrupt
-				fmt.Fprint(out, "software interrupt")
+				value8 := getBitsRange(instruction, 0, 7)
+				fmt.Fprintf(out, "SWI %d", value8)
 			default: // conditional branch
-				fmt.Fprint(out, "conditional branch")
+				cond := getBitsRange(instruction, 8, 11)
+				soffset8 := getBitsRange(instruction, 0, 7)
+				offset := twosComplementToInt(uint32(soffset8<<1), 9)
+				mnemonic := []string{"BEQ", "BNE", "BCS", "BCC", "BMI", "BPL", "BVS", "BVC", "BHI", "BLS", "BGE", "BLT", "BGT", "BLE"}[cond]
+				label := fmt.Sprintf("LAB_%X", pc+offset)
+				fmt.Fprintf(out, "%s %s", mnemonic, label)
 			}
 		}
 
@@ -240,12 +300,25 @@ func disassembler(pc int, codebuffer []byte) {
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
 		case 0: // unconditional branch
-			fmt.Fprint(out, "unconditional branch")
+			offset11 := getBitsRange(instruction, 0, 10)
+			offset := twosComplementToInt(uint32(offset11), 11) << 1
+			label := fmt.Sprintf("LAB_%X", pc+offset)
+			fmt.Fprintf(out, "B %s", label)
 		case 1: // long branch with link
-			fmt.Fprint(out, "long branch with link")
+			offsetHigh := getBitsRange(instruction, 0, 10)
+			nextInstruction := bytesToHalfword(codebuffer[pc+2], codebuffer[pc+3])
+			offsetLow := getBitsRange(nextInstruction, 0, 10)
+			offsetH := twosComplementToInt(uint32(offsetHigh), 11)
+			offsetL := twosComplementToInt(uint32(offsetLow), 11)
+			offset := (offsetH << 12) + (offsetL << 1)
+			label := fmt.Sprintf("LAB_%X", pc+offset)
+			fmt.Fprintf(out, "0x%04X ", nextInstruction)
+			fmt.Fprintf(out, "BL %s\n", label)
+			return 4
 		}
 	}
 	fmt.Println()
+	return 2
 }
 
 func main() {
@@ -253,7 +326,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	for pc := 0; pc < len(bin); pc += 2 {
-		disassembler(pc, bin)
+	pc := 0
+	for pc < len(bin) {
+		pc += disassembler(pc, bin)
 	}
 }

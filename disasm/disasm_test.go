@@ -24,3 +24,25 @@ func TestDisassembler(t *testing.T) {
 		}
 	}
 }
+
+type Params struct {
+	bytes  uint32
+	bitLen int
+}
+
+func TestTwosCompliment(t *testing.T) {
+	var tests = []struct {
+		input Params
+		want  int
+	}{
+		{Params{0xffff, 16}, -1},
+		{Params{0x0000, 16}, 0},
+		{Params{0x00f1, 8}, -15},
+		{Params{0x0071, 8}, 113},
+	}
+	for _, test := range tests {
+		if got := twosComplementToInt(test.input.bytes, test.input.bitLen); got != test.want {
+			t.Errorf("twosComplementToInt(%04X, %d) = %d, want %d", test.input.bytes, test.input.bitLen, got, test.want)
+		}
+	}
+}
