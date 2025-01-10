@@ -8,10 +8,14 @@ type cpsr struct {
 }
 
 type CpuState struct {
-	register [16]uint32
-	cr       cpsr
-	ram      []byte
-	flash    []byte
+	register     [16]uint32
+	sr           cpsr
+	ram          []byte
+	ramBaseAdr   uint32
+	ramLen       uint32
+	flash        []byte
+	flashBaseAdr uint32
+	flashLen     uint32
 }
 
 const (
@@ -21,28 +25,24 @@ const (
 )
 
 func (s CpuState) read(address uint32) byte {
-	if address >= 0x100000 && address <= 0x10FFFF {
-		baseAddress := uint32(0x100000)
-		absoluteAddress := address - baseAddress
+	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
+		absoluteAddress := address - s.ramBaseAdr
 		return s.ram[absoluteAddress]
 	}
-	if address >= 0x200000 && address <= 0x2fffff {
-		baseAddress := uint32(0x200000)
-		absoluteAddress := address - baseAddress
+	if address >= s.flashBaseAdr && address < s.flashBaseAdr+s.flashLen {
+		absoluteAddress := address - s.flashBaseAdr
 		return s.flash[absoluteAddress]
 	}
 	return 0x0
 }
 
 func (s *CpuState) write(address uint32, data byte) {
-	if address >= 0x100000 && address <= 0x10FFFF {
-		baseAddress := uint32(0x100000)
-		absoluteAddress := address - baseAddress
+	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
+		absoluteAddress := address - s.ramBaseAdr
 		s.ram[absoluteAddress] = data
 	}
-	if address >= 0x200000 && address <= 0x2fffff {
-		baseAddress := uint32(0x200000)
-		absoluteAddress := address - baseAddress
+	if address >= s.flashBaseAdr && address < s.flashBaseAdr+s.flashLen {
+		absoluteAddress := address - s.flashBaseAdr
 		s.flash[absoluteAddress] = data
 	}
 }
