@@ -7,6 +7,12 @@ func isSet(bin uint32) bool {
 	return true
 }
 
+func (s *CpuState) srLogicSet(result uint32) {
+	// set zero and negative flag
+	s.sr.zero = result == 0
+	s.sr.negative = isSet(getBitsRange32(result, 31, 31))
+}
+
 func (s *CpuState) moveShiftedRegister(instruction uint16) {
 	opcode := getBitsRange(instruction, 11, 12)
 	offset5 := getBitsRange(instruction, 6, 10)
@@ -54,7 +60,5 @@ func (s *CpuState) moveShiftedRegister(instruction uint16) {
 		// store the result into rd
 		s.register[rd] = val
 	}
-	// set zero and negative flag
-	s.sr.zero = s.register[rd] == 0
-	s.sr.negative = isSet(getBitsRange32(s.register[rd], 31, 31))
+	s.srLogicSet(s.register[rd])
 }

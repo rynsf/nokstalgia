@@ -33,11 +33,12 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 		opcode := getBitsRange(instruction, 11, 12)
 		switch opcode {
 		case 3: // add / substract
+			s.addSub(instruction)
 		default: // move shifted register
 			s.moveShiftedRegister(instruction)
 		}
 	case 1:
-
+		s.movCmpAddSubIm(instruction)
 	case 2:
 	case 3:
 	case 4:
