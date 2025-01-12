@@ -40,6 +40,16 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 	case 1:
 		s.movCmpAddSubIm(instruction)
 	case 2:
+		opbits := getBitsRange(instruction, 11, 12)
+		switch opbits {
+		case 0:
+			bit10 := getBitsRange(instruction, 10, 10)
+			switch bit10 {
+			case 0:
+				s.alu(instruction)
+			case 1:
+			}
+		}
 	case 3:
 	case 4:
 	case 5:
