@@ -50,6 +50,8 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			case 1:
 				s.hiRegOpBranchEx(instruction)
 			}
+		case 1:
+			s.pcRelLoad(instruction)
 		}
 	case 3:
 	case 4:

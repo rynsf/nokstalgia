@@ -24,6 +24,16 @@ const (
 	pc = 15
 )
 
+func (s CpuState) read32(address uint32) uint32 {
+	address = address & ^uint32(3) // word aligned
+	var result uint32
+	result = result | (uint32(s.read(address)) << 24)
+	result = result | (uint32(s.read(address+1)) << 16)
+	result = result | (uint32(s.read(address+2)) << 8)
+	result = result | uint32(s.read(address+3))
+	return result
+}
+
 func (s CpuState) read(address uint32) byte {
 	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
 		absoluteAddress := address - s.ramBaseAdr
