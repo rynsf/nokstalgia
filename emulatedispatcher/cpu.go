@@ -1,5 +1,9 @@
 package emulatedispatcher
 
+import (
+	"encoding/binary"
+)
+
 type cpsr struct {
 	overflow bool
 	carry    bool
@@ -34,6 +38,10 @@ func (s CpuState) read32(address uint32) uint32 {
 	return result
 }
 
+func (s CpuState) read8(address uint32) byte {
+	return s.read(address)
+}
+
 func (s CpuState) read(address uint32) byte {
 	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
 		absoluteAddress := address - s.ramBaseAdr
@@ -44,6 +52,19 @@ func (s CpuState) read(address uint32) byte {
 		return s.flash[absoluteAddress]
 	}
 	return 0x0
+}
+
+func (s *CpuState) write32(address, data uint32) {
+	address = address & ^uint32(3) // word aligned
+	bytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(bytes, data)
+	for i := uint32(0); i < 4; i++ {
+		s.write(address+i, bytes[4])
+	}
+}
+
+func (s *CpuState) write8(address uint32, data byte) {
+	s.write(address, data)
 }
 
 func (s *CpuState) write(address uint32, data byte) {
