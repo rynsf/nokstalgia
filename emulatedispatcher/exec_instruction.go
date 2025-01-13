@@ -48,6 +48,7 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			case 0:
 				s.alu(instruction)
 			case 1:
+				s.hiRegOpBranchEx(instruction)
 			}
 		}
 	case 3:

@@ -7,11 +7,19 @@ import (
 )
 
 func randomizeRegisters(g *gba.GBA, want *CpuState, rng *rand.Rand) {
-	for i := 0; i < 12; i++ {
+	for i := 0; i < 16; i++ {
 		r := rng.Uint32()
 		g.Reg.R[i] = r
 		want.register[i] = r
 	}
+	want.sr.carry = false
+	want.sr.negative = false
+	want.sr.zero = false
+	want.sr.overflow = false
+	g.SetCPSRFlag(28, false)
+	g.SetCPSRFlag(29, false)
+	g.SetCPSRFlag(30, false)
+	g.SetCPSRFlag(31, false)
 }
 
 func getCpuFromGba(g *gba.GBA) CpuState {
@@ -27,7 +35,7 @@ func getCpuFromGba(g *gba.GBA) CpuState {
 }
 
 func pass(c, want *CpuState) bool {
-	for i := 0; i < 12; i++ {
+	for i := 0; i < 16; i++ {
 		if c.register[i] != want.register[i] {
 			return false
 		}
