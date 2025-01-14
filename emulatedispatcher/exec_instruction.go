@@ -69,8 +69,20 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 		case 0: // load/store halfword
 			s.loadStoreHalfword(instruction)
 		case 1: // SP-relative load/store
+			s.spRelLoadStore(instruction)
 		}
 	case 5:
+		bit12 := getBitsRange(instruction, 12, 12)
+		switch bit12 {
+		case 0: // load address
+			s.loadAddress(instruction)
+		case 1:
+			bit10 := getBitsRange(instruction, 10, 10)
+			switch bit10 {
+			case 0:
+			case 1:
+			}
+		}
 	case 6:
 	case 7:
 	}
