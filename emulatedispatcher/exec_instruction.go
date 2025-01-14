@@ -79,7 +79,8 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 		case 1:
 			bit10 := getBitsRange(instruction, 10, 10)
 			switch bit10 {
-			case 0:
+			case 0: // add offset to stack pointer
+
 			case 1:
 			}
 		}
