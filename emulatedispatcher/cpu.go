@@ -38,6 +38,13 @@ func (s CpuState) read32(address uint32) uint32 {
 	return result
 }
 
+func (s CpuState) read16(address uint32) uint32 {
+	var result uint32
+	result = result | (uint32(s.read(address)) << 8)
+	result = result | uint32(s.read(address+1))
+	return result
+}
+
 func (s CpuState) read8(address uint32) byte {
 	return s.read(address)
 }
@@ -61,6 +68,13 @@ func (s *CpuState) write32(address, data uint32) {
 	for i := uint32(0); i < 4; i++ {
 		s.write(address+i, bytes[4])
 	}
+}
+
+func (s *CpuState) write16(address uint32, data uint16) {
+	byte1 := (data >> 8) & uint16(0xff)
+	byte2 := data & uint16(0xff)
+	s.write(address, byte(byte1))
+	s.write(address+1, byte(byte2))
 }
 
 func (s *CpuState) write8(address uint32, data byte) {

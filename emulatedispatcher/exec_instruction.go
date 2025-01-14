@@ -52,6 +52,14 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			}
 		case 1:
 			s.pcRelLoad(instruction)
+		case 2, 3:
+			bit9 := getBitsRange(instruction, 9, 9)
+			switch bit9 {
+			case 0: // load/store with register offset
+				s.loadStoreRegOffset(instruction)
+			case 1: // load/store sign-extended byte/halfword
+				s.loadStoreSBH(instruction)
+			}
 		}
 	case 3:
 	case 4:
