@@ -61,7 +61,8 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 				s.loadStoreSBH(instruction)
 			}
 		}
-	case 3:
+	case 3: // load/store with immediate offset
+		s.LoadStoreImmOffset(instruction)
 	case 4:
 	case 5:
 	case 6:
