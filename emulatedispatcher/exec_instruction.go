@@ -64,6 +64,12 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 	case 3: // load/store with immediate offset
 		s.LoadStoreImmOffset(instruction)
 	case 4:
+		bit12 := getBitsRange(instruction, 12, 12)
+		switch bit12 {
+		case 0: // load/store halfword
+			s.loadStoreHalfword(instruction)
+		case 1: // SP-relative load/store
+		}
 	case 5:
 	case 6:
 	case 7:
