@@ -103,7 +103,8 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 		switch bit12 {
 		case 0: // unconditional branch
 			s.uncondBranch(instruction)
-		case 1:
+		case 1: // long branch with link
+			s.branchLink(instruction)
 		}
 	}
 }
