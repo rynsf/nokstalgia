@@ -86,6 +86,17 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			}
 		}
 	case 6:
+		bit12 := getBitsRange(instruction, 12, 12)
+		switch bit12 {
+		case 0: // multiple load/store
+			s.multipleLoadStore(instruction)
+		case 1:
+			op := getBitsRange(instruction, 8, 11)
+			switch op {
+			case 15: // SWI
+			default: // conditional branch
+			}
+		}
 	case 7:
 	}
 }
