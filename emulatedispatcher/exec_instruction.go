@@ -95,6 +95,7 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			switch op {
 			case 15: // SWI
 			default: // conditional branch
+				s.conditionalBranch(instruction)
 			}
 		}
 	case 7:
