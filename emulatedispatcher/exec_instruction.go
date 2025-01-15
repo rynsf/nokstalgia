@@ -99,5 +99,11 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			}
 		}
 	case 7:
+		bit12 := getBitsRange(instruction, 12, 12)
+		switch bit12 {
+		case 0: // unconditional branch
+			s.uncondBranch(instruction)
+		case 1:
+		}
 	}
 }
