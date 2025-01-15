@@ -76,6 +76,6 @@ func (s *CpuState) conditionalBranch(instruction uint16) {
 
 	if s.check(cond) {
 		offset := int32(int8(byte(instruction & 0b1111_1111)))
-		s.register[pc] = addInt32(s.register[pc]+4, offset*2)
+		s.register[pc] = addInt32(s.loc+4, offset*2)
 	}
 }

@@ -12,7 +12,7 @@ func (s *CpuState) loadAddress(instruction uint16) {
 
 	switch op {
 	case 0: // PC
-		s.register[rd] = (align4(s.register[pc] + 4)) + uint32(offset)
+		s.register[rd] = (align4(s.loc + 4)) + uint32(offset)
 	case 1: // SP
 		s.register[rd] = s.register[sp] + uint32(offset)
 	}
