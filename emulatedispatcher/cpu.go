@@ -67,7 +67,7 @@ func (s *CpuState) write32(address, data uint32) {
 	bytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(bytes, data)
 	for i := uint32(0); i < 4; i++ {
-		s.write(address+i, bytes[4])
+		s.write(address+i, bytes[i])
 	}
 }
 
