@@ -1,6 +1,6 @@
 package emulatedispatcher
 
-func (s *CpuState) AddOffsetSP(instruction uint16) {
+func (s *CpuState) addOffsetSP(instruction uint16) {
 	offset := getBitsRange(instruction, 0, 6)
 	offset *= 4
 	op := getBitsRange(instruction, 7, 7)

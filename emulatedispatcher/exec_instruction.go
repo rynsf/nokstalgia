@@ -22,7 +22,7 @@ func getBitsRange(w uint16, start, end int) uint16 {
 	return leftChoped
 }
 
-func (s *CpuState) ExecInstruction(instruction uint16) {
+func (s *CpuState) execInstruction(instruction uint16) {
 	// decode the instrution
 	// call the appropriate function that implements the instruction
 
@@ -62,7 +62,7 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			}
 		}
 	case 3: // load/store with immediate offset
-		s.LoadStoreImmOffset(instruction)
+		s.loadStoreImmOffset(instruction)
 	case 4:
 		bit12 := getBitsRange(instruction, 12, 12)
 		switch bit12 {
@@ -80,7 +80,7 @@ func (s *CpuState) ExecInstruction(instruction uint16) {
 			bit10 := getBitsRange(instruction, 10, 10)
 			switch bit10 {
 			case 0: // add offset to stack pointer
-				s.AddOffsetSP(instruction)
+				s.addOffsetSP(instruction)
 			case 1: // push/pop instruction
 				s.pushPop(instruction)
 			}

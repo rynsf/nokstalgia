@@ -1,6 +1,6 @@
 package emulatedispatcher
 
-func (s *CpuState) LoadStoreImmOffset(instruction uint16) {
+func (s *CpuState) loadStoreImmOffset(instruction uint16) {
 	rd := getBitsRange(instruction, 0, 2)
 	rb := getBitsRange(instruction, 3, 5)
 	offset := getBitsRange(instruction, 6, 10)
