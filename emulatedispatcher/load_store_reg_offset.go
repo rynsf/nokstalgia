@@ -12,8 +12,8 @@ func (s *CpuState) loadStoreRegOffset(instruction uint16) {
 	case 1: // STRB
 		s.write8(s.register[rb]+s.register[ro], byte(s.register[rd]))
 	case 2: // LDR
-		s.read32(s.register[rb] + s.register[ro])
+		s.register[rd] = s.read32(s.register[rb] + s.register[ro])
 	case 3: // LDRB
-		s.read8(s.register[rb] + s.register[ro])
+		s.register[rd] = uint32(s.read8(s.register[rb] + s.register[ro]))
 	}
 }
