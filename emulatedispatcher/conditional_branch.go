@@ -48,7 +48,7 @@ func (s *CpuState) check(cond uint16) bool {
 			return true
 		}
 	case 9: // not carry
-		if !s.sr.carry && s.sr.zero {
+		if !s.sr.carry || s.sr.zero {
 			return true
 		}
 	case 10: // >=
@@ -64,7 +64,7 @@ func (s *CpuState) check(cond uint16) bool {
 			return true
 		}
 	case 13: // <=
-		if s.sr.zero && (s.sr.negative != s.sr.overflow) {
+		if s.sr.zero || (s.sr.negative != s.sr.overflow) {
 			return true
 		}
 	}
