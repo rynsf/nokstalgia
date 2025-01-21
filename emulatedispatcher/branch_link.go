@@ -11,7 +11,7 @@ func (s *CpuState) branchLink(instruction uint16) {
 	case 1:
 		offset := getBitsRange(instruction, 0, 10)
 		imm := s.register[lr] + (uint32(offset) << 1)
-		s.register[lr] = (s.loc + 2) | 1
+		s.register[lr] = (s.loc + 2)
 		s.register[pc] = imm & ^uint32(1)
 	}
 }
