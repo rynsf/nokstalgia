@@ -2,6 +2,7 @@ package emulatedispatcher
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 type cpsr struct {
@@ -59,6 +60,9 @@ func (s CpuState) read(address uint32) byte {
 		absoluteAddress := address - s.flashBaseAdr
 		return s.flash[absoluteAddress]
 	}
+	if Debug {
+		fmt.Printf("Out of bound read at: %X from: %X\n", address, s.loc)
+	}
 	return 0x0
 }
 
@@ -86,9 +90,14 @@ func (s *CpuState) write(address uint32, data byte) {
 	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
 		absoluteAddress := address - s.ramBaseAdr
 		s.ram[absoluteAddress] = data
+		return
 	}
 	if address >= s.flashBaseAdr && address < s.flashBaseAdr+s.flashLen {
 		absoluteAddress := address - s.flashBaseAdr
 		s.flash[absoluteAddress] = data
+		return
+	}
+	if Debug {
+		fmt.Printf("Out of bound write at: %X from: %X\n", address, s.loc)
 	}
 }
