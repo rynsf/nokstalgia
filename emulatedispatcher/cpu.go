@@ -18,6 +18,9 @@ type CpuState struct {
 	loc          uint32
 	ram          []byte
 	ramBaseAdr   uint32
+	dynamicRam   []byte
+	dynRamBase   uint32
+	dynRamLen    uint32
 	ramLen       uint32
 	flash        []byte
 	flashBaseAdr uint32
@@ -60,6 +63,10 @@ func (s CpuState) read(address uint32) byte {
 		absoluteAddress := address - s.flashBaseAdr
 		return s.flash[absoluteAddress]
 	}
+	if address >= s.dynRamBase && address < s.dynRamBase+s.dynRamLen {
+		absoluteAddress := address - s.dynRamBase
+		return s.dynamicRam[absoluteAddress]
+	}
 	if Debug {
 		fmt.Printf("Out of bound read at: %X from: %X\n", address, s.loc)
 	}
@@ -95,6 +102,11 @@ func (s *CpuState) write(address uint32, data byte) {
 	if address >= s.flashBaseAdr && address < s.flashBaseAdr+s.flashLen {
 		absoluteAddress := address - s.flashBaseAdr
 		s.flash[absoluteAddress] = data
+		return
+	}
+	if address >= s.dynRamBase && address < s.dynRamBase+s.dynRamLen {
+		absoluteAddress := address - s.dynRamBase
+		s.dynamicRam[absoluteAddress] = data
 		return
 	}
 	if Debug {
