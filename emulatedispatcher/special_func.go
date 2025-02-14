@@ -38,3 +38,37 @@ func free(s *CpuState) {
 	ptr -= s.dynRamBase
 	driver.Free(ptr)
 }
+
+func (s *CpuState) UpdateScreen() {
+	s.ownDrawingRoutine()
+}
+
+// nokix's own window drawing routine
+func (s *CpuState) ownDrawingRoutine() {
+	srcPtr := uint32(0x101418)
+	src := s.read32(srcPtr)
+	dst := uint32(0x107604)
+	for i := 0; i < (84 * 6); i++ {
+		b := s.read8(src + uint32(i))
+		s.write(dst+uint32(i), b)
+	}
+}
+
+// TODO: implement blink buffer
+func (s *CpuState) SendToLcd(screen [][]int) [][]int {
+	screenBufferBase := 0x107604
+	for y := 0; y < 48; y++ {
+		for x := 0; x < 84; x++ {
+			yByteAdr := y / 8
+			yBitAdr := y % 8
+			pixelByte := s.read(uint32(screenBufferBase + (yByteAdr * 84) + x))
+			pixelBit := pixelByte & (1 << yBitAdr)
+			if pixelBit == 0 {
+				screen[y][x] = 0
+			} else {
+				screen[y][x] = 1
+			}
+		}
+	}
+	return screen
+}
