@@ -72,3 +72,11 @@ func (s *CpuState) SendToLcd(screen [][]int) [][]int {
 	}
 	return screen
 }
+
+// TODO: write a more complete implementation of windowing system later. But it is not need for current implementation of update_screen.
+func win_print(s *CpuState) {
+}
+
+// TODO: write a more complete implementation of windowing system later. But it is not need for current implementation of update_screen.
+func mark_dirty(s *CpuState) {
+}
