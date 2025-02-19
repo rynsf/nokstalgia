@@ -1,26 +1,31 @@
 package driver
 
 type message struct {
-	id   uint
-	argc uint
-	argv [3]uint
+	id   uint32
+	argc uint32
+	argv [3]uint32
 }
 
 var queue = make([]message, 0)
 
-func (m *message) getId() uint {
+func (m *message) getId() uint32 {
 	return m.id
 }
 
-func (m *message) getArgc() uint {
+func (m *message) getArgc() uint32 {
 	return m.argc
 }
 
-func (m *message) getArgv() [3]uint {
+func (m *message) getArgv() [3]uint32 {
 	return m.argv
 }
 
-func Enq(m message) {
+func Enq(id, argc uint32, argv [3]uint32) {
+	m := message{
+		id,
+		argc,
+		argv,
+	}
 	queue = append(queue, m)
 }
 
