@@ -29,8 +29,11 @@ func Enq(id, argc uint32, argv [3]uint32) {
 	queue = append(queue, m)
 }
 
-func Deq() message {
+func Deq() (message, bool) {
+	if len(queue) == 0 {
+		return message{}, false
+	}
 	m := queue[0]
 	queue = queue[1:]
-	return m
+	return m, true
 }
