@@ -80,3 +80,14 @@ func win_print(s *CpuState) {
 // TODO: write a more complete implementation of windowing system later. But it is not need for current implementation of update_screen.
 func mark_dirty(s *CpuState) {
 }
+
+func (s *CpuState) SetMessage(id, argc uint32, argv [3]uint32) {
+	addrId := driver.Locate("MSG_ID")
+	addrArgc := driver.Locate("MSG_ARGC")
+	addrArgv := driver.Locate("MSG_ARGV")
+	s.write16(addrId, uint16(id))
+	s.write8(addrArgc, uint8(argc))
+	for i := 0; i < 3; i++ {
+		s.write32(addrArgv+uint32(i*4), argv[i])
+	}
+}
