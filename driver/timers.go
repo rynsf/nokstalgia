@@ -15,7 +15,7 @@ type timer struct {
 
 var timers = make([]timer, 0)
 
-func ownTimerStart(id, data, argc uint32, argv [3]uint32, interval int64) {
+func OwnTimerStart(id, data, argc uint32, argv [3]uint32, interval int64) {
 	now := time.Now().UnixNano()
 	t := timer{
 		id,
@@ -28,7 +28,7 @@ func ownTimerStart(id, data, argc uint32, argv [3]uint32, interval int64) {
 	timers = append(timers, t)
 }
 
-func ownTimerAbort(id uint32) {
+func OwnTimerAbort(id uint32) {
 	for i := range timers {
 		if id == timers[i].id {
 			timers = append(timers[:i], timers[i+1:]...)
@@ -36,7 +36,7 @@ func ownTimerAbort(id uint32) {
 	}
 }
 
-func timerTick() {
+func TimerTick() {
 	now := time.Now().UnixNano()
 	for i := range timers {
 		interval := now - timers[i].last

@@ -4,6 +4,8 @@ import (
 	driver "github.com/rynsf/nokstalgia/driver"
 )
 
+const TPS = (1000 / 7.96875) // ticks per second
+
 var specialFunc = make(map[uint32]func(*CpuState))
 
 /*
@@ -90,4 +92,17 @@ func (s *CpuState) SetMessage(id, argc uint32, argv [3]uint32) {
 	for i := 0; i < 3; i++ {
 		s.write32(addrArgv+uint32(i*4), argv[i])
 	}
+}
+
+func own_timer_start(s *CpuState) {
+	todo := s.register[0]
+	time := s.register[2]
+	data := s.read32(todo)
+	interval := time * (1e9 / TPS) // convert ticks to nanoseconds
+	driver.OwnTimerStart(todo, data, 0, [3]uint32{}, int64(interval))
+}
+
+func own_timer_abort(s *CpuState) {
+	id := s.register[0]
+	driver.OwnTimerAbort(id)
 }
