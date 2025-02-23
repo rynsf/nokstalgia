@@ -42,7 +42,7 @@ func TimerTick() {
 		interval := now - timers[i].last
 		if interval >= timers[i].interval {
 			timers[i].last = now
-			Enq(timers[i].id, timers[i].argc, timers[i].argv)
+			Enq(timers[i].data, timers[i].argc, timers[i].argv)
 		}
 	}
 }
