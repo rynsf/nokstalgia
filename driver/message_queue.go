@@ -8,15 +8,15 @@ type message struct {
 
 var queue = make([]message, 0)
 
-func (m *message) getId() uint32 {
+func (m *message) GetId() uint32 {
 	return m.id
 }
 
-func (m *message) getArgc() uint32 {
+func (m *message) GetArgc() uint32 {
 	return m.argc
 }
 
-func (m *message) getArgv() [3]uint32 {
+func (m *message) GetArgv() [3]uint32 {
 	return m.argv
 }
 
