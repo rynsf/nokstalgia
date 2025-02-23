@@ -47,8 +47,8 @@ func (s *CpuState) UpdateScreen() {
 
 // nokix's own window drawing routine
 func (s *CpuState) ownDrawingRoutine() {
-	srcPtr := uint32(0x101418)
-	src := s.read32(srcPtr)
+	srcPtr := uint32(0x101424)
+	src := s.read32(srcPtr) + 8
 	dst := uint32(0x107604)
 	for i := 0; i < (84 * 6); i++ {
 		b := s.read8(src + uint32(i))
