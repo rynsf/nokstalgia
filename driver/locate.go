@@ -13,6 +13,7 @@ var located = map[string]uint32{
 	"MSG_ARGV":        0x10A4EC,
 	"OWN_TIMER_START": 0x2AD494,
 	"OWN_TIMER_ABORT": 0x2AD3F8,
+	"SEND_MESSAGE":    0x28D21A,
 }
 
 // First and a very basic implementation of locate function.

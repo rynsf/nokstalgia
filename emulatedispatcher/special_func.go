@@ -106,3 +106,6 @@ func own_timer_abort(s *CpuState) {
 	id := s.register[0]
 	driver.OwnTimerAbort(id)
 }
+
+func send_message(s *CpuState) {
+}
