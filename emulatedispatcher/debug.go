@@ -12,6 +12,14 @@ func (s *CpuState) GetRam() []byte {
 	return s.ram
 }
 
+func (s *CpuState) GetDynamicRam() []byte {
+	return s.dynamicRam
+}
+
+func (s *CpuState) GetReg(i int) uint32 {
+	return s.register[i]
+}
+
 func (s *CpuState) SetReg(val uint32, i int) {
 	s.register[i] = val
 }
