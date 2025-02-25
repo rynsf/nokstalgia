@@ -109,3 +109,17 @@ func own_timer_abort(s *CpuState) {
 
 func send_message(s *CpuState) {
 }
+
+func own_get_config(s *CpuState) {
+	switch s.register[0] {
+	case 0x0: // level config
+		s.register[0] = 0x7
+	case 0x1: // maze config
+		s.register[0] = 0x0
+	}
+}
+
+func own_get_font(s *CpuState) {
+	s.register[0] = 0x2B04EC
+	s.register[1] = 0x0
+}
