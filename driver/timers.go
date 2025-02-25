@@ -36,6 +36,7 @@ func OwnTimerAbort(id uint32) {
 	}
 }
 
+// TODO: write a better implementation of timers, use map
 func TimerTick() {
 	now := time.Now().UnixNano()
 	for i := range timers {
@@ -43,6 +44,7 @@ func TimerTick() {
 		if interval >= timers[i].interval {
 			timers[i].last = now
 			Enq(timers[i].data, timers[i].argc, timers[i].argv)
+			OwnTimerAbort(timers[i].id) // temp fix
 		}
 	}
 }
