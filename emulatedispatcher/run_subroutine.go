@@ -36,6 +36,9 @@ func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, 
 
 func (s *CpuState) RunSubroutine() {
 	for s.subroutineIsRunning() {
+		if s.specialFuncHandler() {
+			continue
+		}
 		instruction := uint16(s.read16(s.register[pc]))
 		if Debug {
 			s.step()
