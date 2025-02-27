@@ -55,6 +55,9 @@ func (s CpuState) read8(address uint32) byte {
 }
 
 func (s CpuState) read(address uint32) byte {
+	if Debug {
+		fmt.Printf("read at: %X from: %X\n", address, s.loc)
+	}
 	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
 		absoluteAddress := address - s.ramBaseAdr
 		return s.ram[absoluteAddress]
@@ -94,6 +97,9 @@ func (s *CpuState) write8(address uint32, data byte) {
 }
 
 func (s *CpuState) write(address uint32, data byte) {
+	if Debug {
+		fmt.Printf("write at: %X from: %X\n", address, s.loc)
+	}
 	if address >= s.ramBaseAdr && address < s.ramBaseAdr+s.ramLen {
 		absoluteAddress := address - s.ramBaseAdr
 		s.ram[absoluteAddress] = data
