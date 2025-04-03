@@ -123,3 +123,22 @@ func own_get_font(s *CpuState) {
 	s.register[0] = 0x2B04EC
 	s.register[1] = 0x0
 }
+
+func block_alloc(s *CpuState) {
+	a1 := int32(s.register[0]) // cast to signed int32 to get arithmetic shift
+	a1 = (a1 + 0x23) >> 4
+	size := uint32(a1*16) - 4
+	ptr := driver.Malloc(size)
+	ptr += s.dynRamBase
+	s.register[0] = ptr
+}
+
+func block_dealloc(s *CpuState) {
+	ptr := s.register[0]
+	ptr -= s.dynRamBase
+	driver.Free(ptr)
+}
+
+func block_alloc_nowait(s *CpuState) {
+	block_alloc(s)
+}
