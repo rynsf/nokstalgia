@@ -21,8 +21,13 @@ func (s *CpuState) hiRegOpBranchEx(instruction uint16) {
 			s.srArithSubSet(rdval, rsval, result)
 		}
 	case 2: // MOV
-		s.register[rd] = rsval
+		if rs == pc {
+			s.register[rd] = s.loc + 0x4
+		} else {
+			s.register[rd] = rsval
+		}
 	case 3: // BX
-		s.register[pc] = s.register[rs]
+		rsval = rsval & ^uint32(0x1)
+		s.register[pc] = rsval
 	}
 }
