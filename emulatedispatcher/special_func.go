@@ -58,12 +58,14 @@ func (s *CpuState) ownDrawingRoutine() {
 
 // TODO: implement blink buffer
 func (s *CpuState) SendToLcd(screen [][]int) [][]int {
-	screenBufferBase := 0x107604
-	for y := 0; y < 48; y++ {
-		for x := 0; x < 84; x++ {
+	screenBufferBase := int(driver.Locate("SCREEN_BUFFER"))
+	h := int(driver.Locate("SCREEN_HEIGHT"))
+	w := int(driver.Locate("SCREEN_WIDTH"))
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
 			yByteAdr := y / 8
 			yBitAdr := y % 8
-			pixelByte := s.read(uint32(screenBufferBase + (yByteAdr * 84) + x))
+			pixelByte := s.read(uint32(screenBufferBase + (yByteAdr * w) + x))
 			pixelBit := pixelByte & (1 << yBitAdr)
 			if pixelBit == 0 {
 				screen[y][x] = 0
