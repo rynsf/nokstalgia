@@ -5,46 +5,37 @@ import (
 )
 
 type timer struct {
-	id       uint32
-	data     uint32
-	argc     uint32
-	argv     [3]uint32
-	last     int64
-	interval int64
+	id   uint32
+	msg  uint32
+	argc uint32
+	argv [3]uint32
+	end  int64
 }
 
-var timers = make([]timer, 0)
+var timers = make(map[uint32]timer)
 
-func OwnTimerStart(id, data, argc uint32, argv [3]uint32, interval int64) {
-	now := time.Now().UnixNano()
+func TimerStart(id, msg, argc uint32, argv [3]uint32, interval int64) {
+	end := time.Now().UnixNano() + interval
 	t := timer{
 		id,
-		data,
+		msg,
 		argc,
 		argv,
-		now,
-		interval,
+		end,
 	}
-	timers = append(timers, t)
+	timers[t.id] = t
 }
 
-func OwnTimerAbort(id uint32) {
-	for i := range timers {
-		if id == timers[i].id {
-			timers = append(timers[:i], timers[i+1:]...)
-		}
-	}
+func TimerStop(id uint32) {
+	delete(timers, id)
 }
 
-// TODO: write a better implementation of timers, use map
 func TimerTick() {
 	now := time.Now().UnixNano()
 	for i := range timers {
-		interval := now - timers[i].last
-		if interval >= timers[i].interval {
-			timers[i].last = now
-			Enq(timers[i].data, timers[i].argc, timers[i].argv)
-			OwnTimerAbort(timers[i].id) // temp fix
+		if now >= timers[i].end {
+			Enq(timers[i].msg, timers[i].argc, timers[i].argv)
+			delete(timers, i)
 		}
 	}
 }
