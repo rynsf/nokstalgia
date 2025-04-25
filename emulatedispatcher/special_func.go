@@ -144,3 +144,33 @@ func block_dealloc(s *CpuState) {
 func block_alloc_nowait(s *CpuState) {
 	block_alloc(s)
 }
+
+func doNothing(s *CpuState) {
+}
+
+func loadGlobalSettingsValue(s *CpuState) {
+	s.register[0] = 0x1
+}
+
+func readDirectoryFile(s *CpuState) {
+	s.register[0] = 0x1
+}
+
+func gameLoadHighscore(s *CpuState) {
+	// allocate space
+	ptr := driver.Malloc(28)
+	ptr += s.dynRamBase
+	// fill zeros
+	for i := uint32(0); i < 28; i += 4 {
+		s.write32(ptr+i, 0x0) // we don't have pmm, just returning 0s
+	}
+	// write pointer
+	dstPtr := s.register[1]
+	s.write32(dstPtr, ptr)
+	// return 1
+	s.register[0] = 0x1
+}
+
+func engineLoadSettingsValue(s *CpuState) {
+	s.register[0] = 0
+}
