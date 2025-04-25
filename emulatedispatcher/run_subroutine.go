@@ -9,15 +9,34 @@ func (s *CpuState) subroutineIsRunning() bool {
 }
 
 func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, dynamicRam []byte, dynRamBase, dynRamLen uint32, flash []byte, flashBase, flashLen uint32) CpuState {
-	specialFunc[dr.Locate("MALLOC")] = malloc
 	dr.InitDynamicMem(0x4, 0xe000)
-	specialFunc[dr.Locate("MARK_DIRTY")] = mark_dirty
-	specialFunc[dr.Locate("WIN_PRINT")] = win_print
-	specialFunc[dr.Locate("OWN_TIMER_START")] = own_timer_start
-	specialFunc[dr.Locate("OWN_TIMER_ABORT")] = own_timer_abort
+	specialFunc[dr.Locate("MALLOC")] = malloc
 	specialFunc[dr.Locate("SEND_MESSAGE")] = send_message
-	specialFunc[dr.Locate("OWN_GET_CONFIG")] = own_get_config
-	specialFunc[dr.Locate("OWN_GET_FONT")] = own_get_font
+	specialFunc[dr.Locate("BLOCK_ALLOC")] = block_alloc
+	specialFunc[dr.Locate("BLOCK_DEALLOC")] = block_dealloc
+	specialFunc[dr.Locate("BLOCK_ALLOC_NOWAIT")] = block_alloc_nowait
+	specialFunc[dr.Locate("LOAD_GLOBAL_SETTINGS_VALUE")] = loadGlobalSettingsValue
+	specialFunc[dr.Locate("READ_DIRECTORY_FILE")] = readDirectoryFile
+	specialFunc[dr.Locate("DEV_FUNC_TRACE")] = doNothing
+	specialFunc[dr.Locate("TI_ID_SEND")] = doNothing
+	specialFunc[dr.Locate("OS_CONDITIONAL_INT_ENABLE")] = doNothing
+	specialFunc[dr.Locate("OS_CONDITIONAL_INT_DISABLE")] = doNothing
+	specialFunc[dr.Locate("DEV_DISP_REFRESH")] = doNothing
+	specialFunc[dr.Locate("ENGINE_INITILIZE_FILE")] = doNothing
+	specialFunc[dr.Locate("TRANSFER_DOWNLOADED_DATA_INFO")] = doNothing
+	specialFunc[dr.Locate("WRITE_DIRECTORY_FILE")] = doNothing
+	specialFunc[dr.Locate("FREE_DIRECTORY_FILE")] = doNothing
+	specialFunc[dr.Locate("CREATE_MENU")] = doNothing
+	specialFunc[dr.Locate("LOAD_SAVED_GAME")] = doNothing
+	specialFunc[dr.Locate("TRANSLATE_UCS2")] = doNothing
+	specialFunc[dr.Locate("OS_TIMER_STOP")] = os_timer_stop
+	specialFunc[dr.Locate("OS_TIMER_START")] = os_timer_start
+	specialFunc[dr.Locate("IND_CALL")] = doNothing
+	specialFunc[dr.Locate("DEV_KEY_GAME_MODE_ENABLE")] = doNothing
+	specialFunc[dr.Locate("TONE_CLASS_DISABLE")] = doNothing
+	specialFunc[dr.Locate("GAME_LOAD_HIGHSCORE")] = gameLoadHighscore
+	specialFunc[dr.Locate("ENGINE_LOAD_SETTINGS_VALUE")] = engineLoadSettingsValue
+
 	return CpuState{
 		register:     r,
 		sr:           cpsr{v, c, z, n},
