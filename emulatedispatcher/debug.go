@@ -24,6 +24,19 @@ func (s *CpuState) SetReg(val uint32, i int) {
 	s.register[i] = val
 }
 
+func (s *CpuState) ResetReg() {
+	for i := 0; i < 16; i++ {
+		s.register[i] = 0x0
+	}
+}
+
+func (s *CpuState) FillMem(data []byte, base int) int {
+	for i := range data {
+		s.ram[base+i] = data[i]
+	}
+	return base
+}
+
 func (s *CpuState) DumbState() {
 	fmt.Println("Registers: ")
 	for i := 0; i < 13; i++ {
@@ -43,9 +56,12 @@ func (s *CpuState) DumbState() {
 func (s *CpuState) step() {
 	fmt.Print("Press enter to step...")
 	reader := bufio.NewReader(os.Stdin)
-	_, err := reader.ReadString('\n')
+	i, err := reader.ReadString('\n')
 	if err != nil {
 		panic(err)
+	}
+	if i == "c\n" {
+		Debug = false
 	}
 	s.DumbState()
 }
