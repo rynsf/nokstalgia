@@ -33,7 +33,7 @@ const (
 	pc = 15
 )
 
-func (s CpuState) read32(address uint32) uint32 {
+func (s *CpuState) read32(address uint32) uint32 {
 	address = address & ^uint32(3) // word aligned
 	var result uint32
 	result = result | (uint32(s.read(address)) << 24)
@@ -43,18 +43,18 @@ func (s CpuState) read32(address uint32) uint32 {
 	return result
 }
 
-func (s CpuState) read16(address uint32) uint32 {
+func (s *CpuState) read16(address uint32) uint32 {
 	var result uint32
 	result = result | (uint32(s.read(address)) << 8)
 	result = result | uint32(s.read(address+1))
 	return result
 }
 
-func (s CpuState) read8(address uint32) byte {
+func (s *CpuState) read8(address uint32) byte {
 	return s.read(address)
 }
 
-func (s CpuState) read(address uint32) byte {
+func (s *CpuState) read(address uint32) byte {
 	if Debug {
 		fmt.Printf("read at: %X from: %X\n", address, s.loc)
 	}
