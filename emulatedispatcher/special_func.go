@@ -96,17 +96,17 @@ func (s *CpuState) SetMessage(id, argc uint32, argv [3]uint32) {
 	}
 }
 
-func own_timer_start(s *CpuState) {
-	todo := s.register[0]
-	time := s.register[2]
-	data := s.read32(todo)
-	interval := time * (1e9 / TPS) // convert ticks to nanoseconds
-	driver.OwnTimerStart(todo, data, 0, [3]uint32{}, int64(interval))
+func os_timer_start(s *CpuState) {
+	id := s.register[0]
+	t := s.register[1]
+	msg := uint32(0x5AF)        // games only use this timer message, TODO: implement loading data for other timers
+	interval := t * (1e9 / TPS) // convert ticks to nanoseconds
+	driver.TimerStart(id, msg, 0, [3]uint32{}, int64(interval))
 }
 
-func own_timer_abort(s *CpuState) {
+func os_timer_stop(s *CpuState) {
 	id := s.register[0]
-	driver.OwnTimerAbort(id)
+	driver.TimerStop(id)
 }
 
 func send_message(s *CpuState) {
