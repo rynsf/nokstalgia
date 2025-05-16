@@ -1,6 +1,8 @@
 # Nokstalgia
 Nokstalgia is an emulator for retro Nokia games.
 
+![space impact gameplay](https://github.com/user-attachments/assets/5c4b88e9-ac82-4d91-8851-06ebfc489ec5)
+
 ## current status
 space impact from 2100 5.49 works.
 
