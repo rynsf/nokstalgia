@@ -12,6 +12,26 @@ func (s *CpuState) subroutineIsRunning() bool {
 	return s.register[pc] != 0
 }
 
+func (s *CpuState) fillRam(src, dst, l uint32) {
+	for i := uint32(0); i < l; i++ {
+		s.write(dst+i, s.read(src+i))
+	}
+}
+
+func (s *CpuState) fillRamInitBlock() {
+	initBlockPtr := dr.Locate("RAM_INIT_BLOCK")
+	l := s.read32(initBlockPtr)
+	addr := s.read32(initBlockPtr + 4)
+	for l != 0 {
+		s.fillRam(initBlockPtr+8, addr, l)
+
+		l = (((l + 3) >> 2) << 2)
+		initBlockPtr += l + 8
+		l = s.read32(initBlockPtr)
+		addr = s.read32(initBlockPtr + 4)
+	}
+}
+
 func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, dynamicRam []byte, dynRamBase, dynRamLen uint32, flash []byte, flashBase, flashLen uint32) CpuState {
 	dr.InitDynamicMem(0x4, 0xe000)
 	specialFunc[dr.Locate("MALLOC")] = malloc
@@ -41,7 +61,7 @@ func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, 
 	specialFunc[dr.Locate("GAME_LOAD_HIGHSCORE")] = gameLoadHighscore
 	specialFunc[dr.Locate("ENGINE_LOAD_SETTINGS_VALUE")] = engineLoadSettingsValue
 
-	return CpuState{
+	s := CpuState{
 		register:     r,
 		sr:           cpsr{v, c, z, n},
 		loc:          0,
@@ -55,6 +75,8 @@ func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, 
 		flashBaseAdr: flashBase,
 		flashLen:     flashLen,
 	}
+	s.fillRamInitBlock()
+	return s
 }
 
 func (s *CpuState) RunSubroutine() {
