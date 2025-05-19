@@ -4,6 +4,10 @@ import (
 	dr "github.com/rynsf/nokstalgia/driver"
 )
 
+func memAlign(n uint32) uint32 {
+	return n & ^uint32(0x3)
+}
+
 func (s *CpuState) subroutineIsRunning() bool {
 	return s.register[pc] != 0
 }
@@ -66,4 +70,18 @@ func (s *CpuState) RunSubroutine() {
 		s.register[pc] += 2
 		s.execInstruction(instruction)
 	}
+}
+
+func (s *CpuState) RunFunc(pc uint32, regs ...uint32) {
+	if len(regs) > 13 {
+		panic("runFunc: too many register values given")
+	}
+	s.ResetReg()
+	for i, r := range regs {
+		s.SetReg(r, i)
+	}
+	s.SetReg(memAlign(uint32(s.dynRamBase+s.dynRamLen)), 13)
+	s.SetReg(0x0, 14)
+	s.SetReg(pc, 15)
+	s.RunSubroutine()
 }

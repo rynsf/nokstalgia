@@ -50,8 +50,18 @@ func renderScreen() {
 var screen [][]int
 var nok ed.CpuState
 
-func memAlign(n uint32) uint32 {
-	return n & ^uint32(0x3)
+func initGameSpace(nok ed.CpuState) {
+	nok.RunFunc(0x28FD7C, 0x5DC)
+	nok.RunFunc(0x2E655C, 0, 0)
+
+	nok.FillMem([]byte{0x2}, 0xD816)
+	nok.RunFunc(0x2E655C, 1, 0)
+
+	nok.FillMem([]byte{0x0, 0xA}, 0xF6B8)
+	nok.RunFunc(0x28E41E, 0x5AF)
+
+	nok.RunFunc(0x28EEF8, 0x1144)
+	nok.RunFunc(0x28E8E8, 0x5DC)
 }
 
 func main() {
@@ -103,67 +113,10 @@ func main() {
 
 	nok = ed.InitCpu(r, false, false, false, false, ram, uint32(ramBase), uint32(ramlen), dynamicRam, uint32(dynRamBase), uint32(dynRamLen), flashBin, uint32(flashBase), uint32(flashLen))
 
-	nok.ResetReg()
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x27C2A4, 15)                                 // PC
-	nok.RunSubroutine()
+	nok.RunFunc(0x27C2A4)
+	nok.RunFunc(0x28FD7C, 0x5E2)
 
-	nok.ResetReg()
-	nok.SetReg(0x5E2, 0)                                     // a1
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x28FD7C, 15)                                 // PC
-	nok.RunSubroutine()
-
-	nok.ResetReg()
-	nok.SetReg(0x5DC, 0)                                     // a1
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x28FD7C, 15)                                 // PC
-	nok.RunSubroutine()
-
-	nok.ResetReg()
-	nok.SetReg(0, 0)                                         // a1
-	nok.SetReg(0, 1)                                         // a2
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x2E655C, 15)                                 // PC
-	nok.RunSubroutine()
-
-	nok.FillMem([]byte{0x2}, 0xD816)
-
-	nok.ResetReg()
-	nok.SetReg(1, 0)                                         // a1
-	nok.SetReg(0, 1)                                         // a2
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x2E655C, 15)                                 // PC
-	nok.RunSubroutine()
-
-	nok.FillMem([]byte{0x0, 0xA}, 0xF6B8)
-	nok.ResetReg()
-	nok.SetReg(0x5AF, 0)                                     // a1
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x28E41E, 15)                                 // PC
-	nok.RunSubroutine()
-
-	nok.ResetReg()
-	nok.SetReg(0x1144, 0)                                    // a1
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x28EEF8, 15)                                 // PC
-	nok.RunSubroutine()
-
-	nok.ResetReg()
-	nok.SetReg(0x5DC, 0)                                     // a1
-	nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-	nok.SetReg(0x0, 14)                                      // LR
-	nok.SetReg(0x28E8E8, 15)                                 // PC
-	nok.DumbState()
-	nok.RunSubroutine()
-	nok.DumbState()
+	initGameSpace(nok)
 
 	nok.SendToLcd(screen)
 
@@ -184,16 +137,9 @@ func main() {
 		dr.TimerTick()
 		m, ok := dr.Deq()
 		if ok {
-			nok.ResetReg()
 			id := m.GetId()
-			argc := m.GetArgc()
-			argv := m.GetArgv()
-			nok.SetMessage(id, argc, argv)
-			nok.SetReg(id, 0)
-			nok.SetReg(memAlign(uint32(dynRamBase+dynRamLen-4)), 13) // SP
-			nok.SetReg(0x0, 14)                                      // LR
-			nok.SetReg(0x28E8E8, 15)                                 // PC
-			nok.RunSubroutine()
+			nok.SetMessage(id, m.GetArgc(), m.GetArgv())
+			nok.RunFunc(0x28E8E8, id)
 			nok.SendToLcd(screen)
 		}
 		renderScreen()
