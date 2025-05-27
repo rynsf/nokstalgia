@@ -50,6 +50,36 @@ func renderScreen() {
 var screen [][]int
 var nok ed.CpuState
 
+func initGameSnake(nok ed.CpuState) {
+	nok.FillMem([]byte{0, 0, 0, 0x19}, 0xFC68)
+	nok.RunFunc(0x28FD7C, 0x5DC)
+	nok.RunFunc(0x2E655C, 0, 0)
+
+	nok.FillMem([]byte{0x1}, 0xD816)
+	nok.RunFunc(0x2E655C, 0, 0)
+
+	for i := 0; i < 9; i++ {
+		nok.RunFunc(0x28E41E, 0x5AF)
+	}
+
+	nok.RunFunc(0x28EEF8, 0x1144)
+	nok.RunFunc(0x28E8E8, 0x5DC)
+}
+
+func initGameLink(nok ed.CpuState) {
+	nok.RunFunc(0x28FD7C, 0x5DC)
+	nok.RunFunc(0x2E655C, 0, 0)
+
+	nok.FillMem([]byte{0x3}, 0xD816)
+	nok.RunFunc(0x2E655C, 2, 0)
+
+	nok.FillMem([]byte{0x7}, 0xFB5C)
+	nok.RunFunc(0x28E41E, 0x5AF)
+
+	nok.RunFunc(0x28EEF8, 0x1144)
+	nok.RunFunc(0x28E8E8, 0x5DC)
+}
+
 func initGameSpace(nok ed.CpuState) {
 	nok.RunFunc(0x28FD7C, 0x5DC)
 	nok.RunFunc(0x2E655C, 0, 0)
