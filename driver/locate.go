@@ -46,8 +46,8 @@ var located = map[string]uint32{
 	"DEV_KEY_GAME_MODE_ENABLE":      0x300FC8,
 	"TONE_CLASS_DISABLE":            0x301CF6,
 	"GAME_LOAD_HIGHSCORE":           0x2F4D98,
-	"ENGINE_LOAD_SETTINGS_VALUE":    0x2CEBA0,
 	"RAM_INIT_BLOCK":                0x3088D0,
+	"SETTINGS_GET_VALUE":            0x2f49d4,
 }
 
 var flash []byte

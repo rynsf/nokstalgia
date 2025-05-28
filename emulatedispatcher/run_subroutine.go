@@ -59,7 +59,7 @@ func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, 
 	specialFunc[dr.Locate("DEV_KEY_GAME_MODE_ENABLE")] = doNothing
 	specialFunc[dr.Locate("TONE_CLASS_DISABLE")] = doNothing
 	specialFunc[dr.Locate("GAME_LOAD_HIGHSCORE")] = gameLoadHighscore
-	specialFunc[dr.Locate("ENGINE_LOAD_SETTINGS_VALUE")] = engineLoadSettingsValue
+	specialFunc[dr.Locate("SETTINGS_GET_VALUE")] = settingsGetValue
 
 	s := CpuState{
 		register:     r,

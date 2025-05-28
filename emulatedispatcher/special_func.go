@@ -171,6 +171,16 @@ func gameLoadHighscore(s *CpuState) {
 	s.register[0] = 0x1
 }
 
-func engineLoadSettingsValue(s *CpuState) {
-	s.register[0] = 0
+// TODO: handle game settings with the cli
+func settingsGetValue(s *CpuState) {
+	if s.register[0] == 2 {
+		s.write32(s.register[1], 0x1) // level
+		s.register[0] = 1
+	} else if s.register[0] == 4 {
+		s.write32(s.register[1], 0x0) // rules
+		s.register[0] = 0
+	} else if s.register[0] == 5 {
+		s.write32(s.register[1], 0x0) // challenges
+		s.register[0] = 0
+	}
 }
