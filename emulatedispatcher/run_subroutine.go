@@ -60,6 +60,7 @@ func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, 
 	specialFunc[dr.Locate("TONE_CLASS_DISABLE")] = doNothing
 	specialFunc[dr.Locate("GAME_LOAD_HIGHSCORE")] = gameLoadHighscore
 	specialFunc[dr.Locate("SETTINGS_GET_VALUE")] = settingsGetValue
+	specialFunc[dr.Locate("GAME_LINK_DISTANCE")] = gameLinkDistance
 
 	s := CpuState{
 		register:     r,

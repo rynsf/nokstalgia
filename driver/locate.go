@@ -48,6 +48,7 @@ var located = map[string]uint32{
 	"GAME_LOAD_HIGHSCORE":           0x2F4D98,
 	"RAM_INIT_BLOCK":                0x3088D0,
 	"SETTINGS_GET_VALUE":            0x2f49d4,
+	"GAME_LINK_DISTANCE":            0x298BC2,
 }
 
 var flash []byte
