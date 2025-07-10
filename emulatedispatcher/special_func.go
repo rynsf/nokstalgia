@@ -175,14 +175,26 @@ func gameLoadHighscore(s *CpuState) {
 
 // TODO: handle game settings with the cli
 func settingsGetValue(s *CpuState) {
-	if s.register[0] == 2 {
-		s.write32(s.register[1], 0x1) // level
+	switch driver.GetSelectedGame() {
+	case "Snake II":
+		switch s.register[0] {
+		case 2:
+			s.write32(s.register[1], driver.GetConfig("level"))
+		case 4:
+			s.write32(s.register[1], driver.GetConfig("maze"))
+		}
 		s.register[0] = 1
-	} else if s.register[0] == 4 {
-		s.write32(s.register[1], 0x0) // rules
-		s.register[0] = 0
-	} else if s.register[0] == 5 {
-		s.write32(s.register[1], 0x0) // challenges
+	case "Link5":
+		switch s.register[0] {
+		case 2:
+			s.write32(s.register[1], driver.GetConfig("level"))
+		case 4:
+			s.write32(s.register[1], driver.GetConfig("rules"))
+		case 5:
+			s.write32(s.register[1], driver.GetConfig("challenges"))
+		}
+		s.register[0] = 1
+	default:
 		s.register[0] = 0
 	}
 }

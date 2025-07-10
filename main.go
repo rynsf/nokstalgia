@@ -1,7 +1,10 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
+	"strings"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 	dr "github.com/rynsf/nokstalgia/driver"
@@ -94,8 +97,91 @@ func initGameSpace(nok ed.CpuState) {
 	nok.RunFunc(0x28E8E8, 0x5DC)
 }
 
+var gameList = []string{ //TODO: write locate to find all games in rom
+	"Snake II",
+	"Space Impact",
+	"Link5",
+}
+
+func printGameList() {
+	fmt.Println("Games available in ROM are:")
+	for i, s := range gameList {
+		fmt.Printf("%d. %s\n", i+1, s)
+	}
+}
+
+func usage() {
+	fmt.Println("Welcome to Nokstalgia!") //TODO: Write a friendly manual
+}
+
+func whichGame(game string) string {
+	match := []string{}
+	for _, s := range gameList {
+		if strings.Contains(strings.ToLower(s), strings.ToLower(game)) {
+			match = append(match, s)
+		}
+	}
+	if len(match) != 1 {
+		return ""
+	}
+	return match[0]
+}
+
+func parseArgs() string {
+	if len(os.Args) < 3 {
+		usage()
+		return ""
+	}
+	switch os.Args[1] {
+	case "run":
+		runCmdSet := flag.NewFlagSet("run", flag.ExitOnError)
+		if len(os.Args) < 4 {
+			usage()
+			return ""
+		}
+		selectedGame := whichGame(os.Args[2])
+		if selectedGame == "" {
+			return ""
+		}
+		switch selectedGame {
+		case "Snake II":
+			level := runCmdSet.Int("level", 0, "Speed of snake")
+			maze := runCmdSet.Int("maze", 0, "maze")
+			runCmdSet.Parse(os.Args[3:])
+			dr.SetConfig("level", uint32(*level))
+			dr.SetConfig("maze", uint32(*maze))
+			dr.SetSelectedGame("Snake II")
+			return runCmdSet.Args()[0]
+		case "Space Impact":
+			dr.SetSelectedGame("Space Impact")
+			return os.Args[len(os.Args)-1]
+		case "Link5":
+			level := runCmdSet.Int("level", 0, "level")
+			rules := runCmdSet.Int("rules", 0, "rules")
+			challenges := runCmdSet.Int("challenges", 0, "challenges")
+			runCmdSet.Parse(os.Args[3:])
+			dr.SetConfig("level", uint32(*level))
+			dr.SetConfig("rules", uint32(*rules))
+			dr.SetConfig("challenges", uint32(*challenges))
+			dr.SetSelectedGame("Link5")
+			return os.Args[len(os.Args)-1]
+		}
+	case "list":
+		printGameList()
+		return ""
+	default:
+		usage()
+		return ""
+	}
+	return ""
+}
+
 func main() {
-	flashBin, err := os.ReadFile("./assets/flash.fls")
+	romName := parseArgs()
+	if romName == "" {
+		return
+	}
+	flashBin, err := os.ReadFile(romName)
 	if err != nil {
 		panic(err)
 	}
@@ -124,7 +210,14 @@ func main() {
 	nok.RunFunc(0x27C2A4)
 	nok.RunFunc(0x28FD7C, 0x5E2)
 
-	initGameSpace(nok)
+	switch dr.GetSelectedGame() {
+	case "Snake II":
+		initGameSnake(nok)
+	case "Space Impact":
+		initGameSpace(nok)
+	case "Link5":
+		initGameLink(nok)
+	}
 
 	nok.SendToLcd(screen)
 
