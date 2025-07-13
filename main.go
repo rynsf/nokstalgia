@@ -15,15 +15,51 @@ const (
 	PW = 10
 )
 
+// TODO: add custom per game key bindings
+/*
+bindings for colemak wide mode
 var keymap = map[int32]int{
-	rl.KeyL: 7,
-	rl.KeyU: 8,
-	rl.KeyY: 9,
-	rl.KeyN: 0xC,
-	rl.KeyE: 0xA,
-	rl.KeyI: 0xB,
-	rl.KeyS: 0x1,
-	rl.KeyT: 0x4,
+	rl.KeyEight:  0x1,
+	rl.KeyNine:   0x2,
+	rl.KeyZero:   0x3,
+	rl.KeyL:      0x4,
+	rl.KeyU:      0x5,
+	rl.KeyY:      0x6,
+	rl.KeyN:      0x7,
+	rl.KeyE:      0x8,
+	rl.KeyI:      0x9,
+	rl.KeyM:      0xC,
+	rl.KeyComma:  0xA,
+	rl.KeyPeriod: 0xB,
+	rl.KeyW:      0x19,
+	rl.KeyF:      0x17,
+	rl.KeyP:      0x1A,
+	rl.KeyR:      0xE,
+	rl.KeyS:      0x18,
+	rl.KeyT:      0xF,
+}
+*/
+
+// bindings for qwerty
+var keymap = map[int32]int{
+	rl.KeySeven:  0x1,
+	rl.KeyEight:  0x2,
+	rl.KeyNine:   0x3,
+	rl.KeyU:      0x4,
+	rl.KeyI:      0x5,
+	rl.KeyO:      0x6,
+	rl.KeyJ:      0x7,
+	rl.KeyK:      0x8,
+	rl.KeyL:      0x9,
+	rl.KeyM:      0xC,
+	rl.KeyComma:  0xA,
+	rl.KeyPeriod: 0xB,
+	rl.KeyW:      0x19,
+	rl.KeyE:      0x17,
+	rl.KeyR:      0x1A,
+	rl.KeyS:      0xE,
+	rl.KeyD:      0x18,
+	rl.KeyF:      0xF,
 }
 
 func fillMem(data []byte, mem []byte, base int) int {
