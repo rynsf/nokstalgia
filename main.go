@@ -90,6 +90,8 @@ var screen [][]int
 var nok ed.CpuState
 
 func initGameSnake(nok ed.CpuState) {
+	nok.FillMem([]byte{0x1}, 0xD828)
+	nok.FillMem([]byte{0x1}, 0xFB6C)
 	nok.FillMem([]byte{0, 0, 0, 0x19}, 0xFC68)
 	nok.RunFunc(0x28FD7C, 0x5DC)
 	nok.RunFunc(0x2E655C, 0, 0)
@@ -120,6 +122,8 @@ func initGameLink(nok ed.CpuState) {
 }
 
 func initGameSpace(nok ed.CpuState) {
+	nok.FillMem([]byte{0x1}, 0xD828)
+	nok.FillMem([]byte{0x1}, 0xFB6C)
 	nok.RunFunc(0x28FD7C, 0x5DC)
 	nok.RunFunc(0x2E655C, 0, 0)
 
@@ -260,6 +264,16 @@ func main() {
 	rl.SetTraceLogLevel(rl.LogError)
 	rl.InitWindow(int32(W*PW), int32(H*PW), "nokstalgia")
 	defer rl.CloseWindow()
+
+	rl.InitAudioDevice()
+	defer rl.CloseAudioDevice()
+
+	stream := rl.LoadAudioStream(dr.SampleRate, 32, 1)
+	defer rl.UnloadAudioStream(stream)
+
+	rl.PlayAudioStream(stream)
+
+	rl.SetAudioStreamCallback(stream, dr.GenerateWave)
 
 	rl.SetTargetFPS(120)
 	for !rl.WindowShouldClose() {

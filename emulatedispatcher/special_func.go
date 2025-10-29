@@ -1,6 +1,7 @@
 package emulatedispatcher
 
 import (
+	"fmt"
 	"math"
 
 	driver "github.com/rynsf/nokstalgia/driver"
@@ -211,4 +212,29 @@ func gameLinkDistance(s *CpuState) {
 	sum := (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1)
 	result := math.Sqrt(float64(sum))
 	s.register[0] = uint32(result)
+}
+
+func osSendMsg(s *CpuState) {
+	task := s.register[0]
+	switch task {
+	case 6:
+		toneStructPtr := s.read32(s.register[1])
+		fmt.Printf("OS_SEND_MSG: tone with 0x%X\n", toneStructPtr)
+		tonePtr := s.read32(toneStructPtr)
+		playTone(s, tonePtr)
+	}
+}
+
+func playTone(s *CpuState, tonePtr uint32) {
+	toneBin := []byte{}
+	fmt.Printf("PLAYTONE: tone at 0x%X\n", tonePtr)
+	if s.read8(tonePtr) == 0x00 && s.read8(tonePtr+1) == 0x09 {
+		tonePtr += 2
+		for s.read8(tonePtr) != 0x0B {
+			toneBin = append(toneBin, s.read8(tonePtr))
+			tonePtr += 1
+		}
+		fmt.Printf("PLAYTONE: tone binary: %v\n", toneBin)
+		driver.PlayTone(toneBin)
+	}
 }

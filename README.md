@@ -37,7 +37,7 @@ all games from 2100 5.49 work.
 
 ## TODO
 - [x] implement a CLI interface
-- [ ] emulate audio
+- [x] emulate audio
 - [ ] emulate the menuing system
 - [ ] make NokiX games work
 - [ ] support games from other phones
