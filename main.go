@@ -40,6 +40,18 @@ var keymap = map[int32]int{
 }
 */
 
+// colemak bindings for space impact
+/*
+var keymap = map[int32]int{
+	rl.KeyS: 0x1,
+	rl.KeyT: 0x4,
+	rl.KeyU: 0x8,
+	rl.KeyN: 0xC,
+	rl.KeyE: 0xA,
+	rl.KeyI: 0xB,
+}
+*/
+
 // bindings for qwerty
 var keymap = map[int32]int{
 	rl.KeySeven:  0x1,

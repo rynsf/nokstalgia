@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -54,7 +53,6 @@ func PlayTone(malodyBin []byte) {
 			malody = append(malody, Tone{freq, samp})
 		}
 	}
-	fmt.Printf("PLAYTONE DRIVER: Malody: %v\n", malody)
 	go func() {
 		ch <- malody
 	}()
