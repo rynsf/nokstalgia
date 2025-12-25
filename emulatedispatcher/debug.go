@@ -3,7 +3,9 @@ package emulatedispatcher
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"time"
 )
 
 var Debug bool // when set, step through instructions and print debug info
@@ -62,6 +64,17 @@ func (s *CpuState) step() {
 	}
 	if i == "c\n" {
 		Debug = false
+	}
+	if i == "d\n" {
+		filename := fmt.Sprintf("memdump-%d.bin", time.Now().Unix())
+		file, err := os.Create(filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		file.Write(s.ram)
+		file.Write(s.dynamicRam)
 	}
 	s.DumbState()
 }
