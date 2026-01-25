@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	PW = 10
+	PW = 27
 )
 
 // TODO: add custom per game key bindings
@@ -51,8 +51,24 @@ var keymap = map[int32]int{
 	rl.KeyI: 0xB,
 }
 */
+/*
+var keymap = map[int32]int{
+	rl.KeyU: 0x2,
+	rl.KeyN: 0x4,
+	rl.KeyE: 0x8,
+	rl.KeyI: 0x6,
+}
+*/
+
+var keymap = map[int32]int{
+	rl.KeyU: 0x2,
+	rl.KeyN: 0x4,
+	rl.KeyE: 0x8,
+	rl.KeyI: 0x6,
+}
 
 // bindings for qwerty
+/*
 var keymap = map[int32]int{
 	rl.KeySeven:  0x1,
 	rl.KeyEight:  0x2,
@@ -73,6 +89,18 @@ var keymap = map[int32]int{
 	rl.KeyD:      0x18,
 	rl.KeyF:      0xF,
 }
+*/
+
+/*
+var keymap = map[int32]int{
+	rl.KeyD:         0x1,
+	rl.KeyF:         0x4,
+	rl.KeyO:         0x8,
+	rl.KeyK:         0xC,
+	rl.KeyL:         0xA,
+	rl.KeySemicolon: 0xB,
+}
+*/
 
 func fillMem(data []byte, mem []byte, base int) int {
 	for i := range data {
@@ -90,11 +118,18 @@ func renderScreen() {
 	rl.ClearBackground(bgColor)
 	for y := 0; y < H; y++ {
 		for x := 0; x < W; x++ {
+			rec := rl.NewRectangle(float32(x*PW), float32(y*PW), float32(PW), float32(PW))
 			if screen[y][x] == 1 {
-				rl.DrawRectangle(int32(x*PW), int32(y*PW), int32(PW), int32(PW), fgColor)
+				rl.DrawRectangleRec(rec, fgColor)
+				//rl.DrawRectangleLinesEx(rec, 1, rl.Black)
+			} else {
+				rl.DrawRectangleRec(rec, bgColor)
+				//rl.DrawRectangleLinesEx(rec, 1, rl.Black)
 			}
 		}
 	}
+	debugInfo := fmt.Sprintf("len: %d   x: %d  y: %d", snakeLen, snakeHeadX, snakeHeadY)
+	rl.DrawText(debugInfo, 1000, 10, 75, rl.Black)
 	rl.EndDrawing()
 }
 
@@ -105,6 +140,8 @@ func initGameSnake(nok ed.CpuState) {
 	nok.FillMem([]byte{0x1}, 0xD828)
 	nok.FillMem([]byte{0x1}, 0xFB6C)
 	nok.FillMem([]byte{0, 0, 0, 0x19}, 0xFC68)
+
+	//nok.FillMem([]byte{0, 0, 0x0, 0x0}, 0xFC68)
 	nok.RunFunc(0x28FD7C, 0x5DC)
 	nok.RunFunc(0x2E655C, 0, 0)
 
@@ -197,7 +234,7 @@ func parseArgs() string {
 		}
 		switch selectedGame {
 		case "Snake II":
-			level := runCmdSet.Int("level", 0, "Speed of snake")
+			level := runCmdSet.Int("level", 1, "Speed of snake")
 			maze := runCmdSet.Int("maze", 0, "maze")
 			runCmdSet.Parse(os.Args[3:])
 			dr.SetConfig("level", uint32(*level))
@@ -228,6 +265,12 @@ func parseArgs() string {
 	return ""
 }
 
+var stepToKey = []uint32{0x2, 0x6, 0x8, 0x4}
+var snake dr.State
+var snakeLen int
+var snakeHeadX int
+var snakeHeadY int
+
 func main() {
 	romName := parseArgs()
 	if romName == "" {
@@ -252,6 +295,8 @@ func main() {
 	for i := 0; i < H; i++ {
 		screen[i] = make([]int, W)
 	}
+
+	snake = dr.NewGame(dynamicRam)
 
 	fillMem([]byte{0x3}, ram, 0x3FEA0)
 	fillMem([]byte{0x1}, ram, 0x3FC4A)
@@ -287,6 +332,11 @@ func main() {
 
 	rl.SetAudioStreamCallback(stream, dr.GenerateWave)
 
+	s := snake.Step()
+	nextStep := stepToKey[s]
+	dr.Enq(0xC8, 1, [3]uint32{nextStep})
+	dr.Enq(0xC9, 1, [3]uint32{nextStep})
+
 	rl.SetTargetFPS(120)
 	for !rl.WindowShouldClose() {
 		for k := range keymap {
@@ -301,6 +351,16 @@ func main() {
 		m, ok := dr.Deq()
 		if ok {
 			id := m.GetId()
+			if id == 0x5AF {
+				if !snake.Done {
+					snakeHeadX, snakeHeadY = snake.GetHead()
+					snakeLen = len(snake.Snake)
+					s := snake.Step()
+					nextStep := stepToKey[s]
+					dr.Enq(0xC8, 1, [3]uint32{nextStep})
+					dr.Enq(0xC9, 1, [3]uint32{nextStep})
+				}
+			}
 			nok.SetMessage(id, m.GetArgc(), m.GetArgv())
 			nok.RunFunc(0x28E8E8, id)
 			nok.SendToLcd(screen)
