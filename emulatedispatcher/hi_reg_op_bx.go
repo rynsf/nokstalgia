@@ -27,6 +27,11 @@ func (s *CpuState) hiRegOpBranchEx(instruction uint16) {
 			s.register[rd] = rsval
 		}
 	case 3: // BX
+		if rsval&0x1 == 0 {
+			s.thumb = false
+		} else {
+			s.thumb = true
+		}
 		rsval = rsval & ^uint32(0x1)
 		s.register[pc] = rsval
 	}

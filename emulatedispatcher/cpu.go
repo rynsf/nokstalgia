@@ -15,6 +15,7 @@ type cpsr struct {
 type CpuState struct {
 	register     [16]uint32
 	sr           cpsr
+	thumb        bool
 	loc          uint32
 	ram          []byte
 	ramBaseAdr   uint32
