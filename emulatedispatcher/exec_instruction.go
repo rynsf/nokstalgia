@@ -22,6 +22,70 @@ func getBitsRange(w uint16, start, end int) uint16 {
 	return leftChoped
 }
 
+func isArmALU(instruction uint32) bool {
+	return instruction&0b0000_1100_0000_0000_0000_0000_0000_0000 == 0
+}
+
+func (s *CpuState) execArmALU(instruction uint32) {
+}
+
+func isArmBx(instruction uint32) bool {
+	return instruction&0b0000_1111_1111_1111_1111_1111_1111_0000 == 0b0000_0001_0010_1111_1111_1111_0001_0000
+}
+
+func (s *CpuState) execArmBx(instruction uint32) {
+	rn := getBitsRange32(instruction, 0, 3)
+	rnVal := s.register[rn]
+
+	if rnVal&0x1 == 0 {
+		s.thumb = false
+	} else {
+		s.thumb = true
+	}
+
+	rnVal = rnVal & ^uint32(0x1)
+	s.register[pc] = rnVal
+}
+
+func isArmMull(instruction uint32) bool {
+	return instruction&0b0000_1111_1000_0000_0000_0000_1111_0000 == 0b0000_0000_1000_0000_0000_0000_1001_0000
+}
+
+func (s *CpuState) execArmMull(instruction uint32) {
+	opcode := getBitsRange32(instruction, 20, 22)
+	switch opcode {
+	case 0: // UMALL
+		rdhi := getBitsRange32(instruction, 16, 19)
+		rdlo := getBitsRange32(instruction, 12, 15)
+		rs := getBitsRange32(instruction, 8, 11)
+		rm := getBitsRange32(instruction, 0, 3)
+
+		result := uint64(s.register[rs]) * uint64(s.register[rm])
+		s.register[rdhi], s.register[rdlo] = uint32(result>>32), uint32(result)
+		if getBitsRange32(instruction, 20, 20) == 1 {
+			s.sr.zero = result == 0
+			s.sr.negative = isSet(getBitsRange32(s.register[rdhi], 31, 31))
+		}
+	}
+}
+
+func (s *CpuState) execArmInstruction(instruction uint32) {
+	// docode and execute arm instruction
+	// only implementing the instructions that the phones actually executes
+	// ARM mode is only used in FD_MUL function for multiplication of
+	// floating point numbers, which is in turned used by sqrt in link5
+
+	switch {
+	case isArmBx(instruction): // bx
+		s.execArmBx(instruction)
+	case isArmMull(instruction): // mull
+		s.execArmMull(instruction)
+	case isArmALU(instruction): // adr, adds and mov
+		s.execArmALU(instruction)
+	}
+
+}
+
 func (s *CpuState) execInstruction(instruction uint16) {
 	// decode the instrution
 	// call the appropriate function that implements the instruction
