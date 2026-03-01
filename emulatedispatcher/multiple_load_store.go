@@ -14,13 +14,19 @@ func (s *CpuState) multipleLoadStore(instruction uint16) {
 			}
 		}
 	case 1: // LDMIA
+		basePtr := s.register[rb]
+		rbInRlist := false
 		for i := 0; i < 8; i++ {
 			if getBitsRange(rlist, i, i) == 1 {
-				s.register[i] = s.read32(s.register[rb])
-				if i != int(rb) {
-					s.register[rb] += 4
+				s.register[i] = s.read32(basePtr)
+				basePtr += 4
+				if int(rb) == i {
+					rbInRlist = true
 				}
 			}
+		}
+		if !rbInRlist {
+			s.register[rb] = basePtr
 		}
 	}
 }
