@@ -60,12 +60,12 @@ func InitCpu(r [16]uint32, v, c, z, n bool, ram []byte, ramBase, ramLen uint32, 
 	specialFunc[dr.Locate("TONE_CLASS_DISABLE")] = doNothing
 	specialFunc[dr.Locate("GAME_LOAD_HIGHSCORE")] = gameLoadHighscore
 	specialFunc[dr.Locate("SETTINGS_GET_VALUE")] = settingsGetValue
-	specialFunc[dr.Locate("GAME_LINK_DISTANCE")] = gameLinkDistance
 	specialFunc[dr.Locate("OS_SEND_MSG")] = osSendMsg
 
 	s := CpuState{
 		register:     r,
 		sr:           cpsr{v, c, z, n},
+		thumb:        true,
 		loc:          0,
 		ram:          ram,
 		ramBaseAdr:   ramBase,
@@ -86,13 +86,22 @@ func (s *CpuState) RunSubroutine() {
 		if s.specialFuncHandler() {
 			continue
 		}
-		instruction := uint16(s.read16(s.register[pc]))
+		if s.register[pc] == 0x3067f8 {
+			Debug = false
+		}
 		if Debug {
 			s.step()
 		}
 		s.loc = s.register[pc]
-		s.register[pc] += 2
-		s.execInstruction(instruction)
+		if s.thumb {
+			instruction := uint16(s.read16(s.register[pc]))
+			s.register[pc] += 2
+			s.execInstruction(instruction)
+		} else {
+			instruction := s.read32(s.register[pc])
+			s.register[pc] += 4
+			s.execArmInstruction(uint32(instruction))
+		}
 	}
 }
 
