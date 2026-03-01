@@ -1,8 +1,6 @@
 package emulatedispatcher
 
 import (
-	"math"
-
 	driver "github.com/rynsf/nokstalgia/driver"
 )
 
@@ -197,20 +195,6 @@ func settingsGetValue(s *CpuState) {
 	default:
 		s.register[0] = 0
 	}
-}
-
-func gameLinkDistance(s *CpuState) {
-	a := s.read32(s.register[0])
-	b := s.read32(s.register[1])
-
-	x1 := getBitsRange32(a, 0, 15)
-	y1 := getBitsRange32(a, 16, 31)
-	x2 := getBitsRange32(b, 0, 15)
-	y2 := getBitsRange32(b, 16, 31)
-
-	sum := (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1)
-	result := math.Sqrt(float64(sum))
-	s.register[0] = uint32(result)
 }
 
 func osSendMsg(s *CpuState) {
