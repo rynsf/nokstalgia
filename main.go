@@ -197,7 +197,7 @@ func parseArgs() string {
 		}
 		switch selectedGame {
 		case "Snake II":
-			level := runCmdSet.Int("level", 0, "Speed of snake")
+			level := runCmdSet.Int("level", 1, "Speed of snake")
 			maze := runCmdSet.Int("maze", 0, "maze")
 			runCmdSet.Parse(os.Args[3:])
 			dr.SetConfig("level", uint32(*level))
@@ -208,7 +208,7 @@ func parseArgs() string {
 			dr.SetSelectedGame("Space Impact")
 			return os.Args[len(os.Args)-1]
 		case "Link5":
-			level := runCmdSet.Int("level", 0, "level")
+			level := runCmdSet.Int("level", 1, "level")
 			rules := runCmdSet.Int("rules", 0, "rules")
 			challenges := runCmdSet.Int("challenges", 0, "challenges")
 			runCmdSet.Parse(os.Args[3:])
