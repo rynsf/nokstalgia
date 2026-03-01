@@ -26,7 +26,41 @@ func isArmALU(instruction uint32) bool {
 	return instruction&0b0000_1100_0000_0000_0000_0000_0000_0000 == 0
 }
 
+func (s *CpuState) execArmAdd(instruction uint32) {
+	rd := getBitsRange32(instruction, 12, 15)
+	rn := s.register[getBitsRange32(instruction, 16, 19)]
+	op2 := s.armGetOp2(instruction)
+
+	result := uint64(rn) + uint64(op2)
+	s.register[rd] = uint32(result)
+
+	if getBitsRange32(instruction, 20, 20) == 1 {
+		s.srArithAddSet(rn, op2, result)
+	}
+}
+
+func (s *CpuState) armGetOp2(instruction uint32) uint32 {
+	imm := getBitsRange32(instruction, 25, 25)
+	if imm == 0x1 {
+		return getBitsRange32(instruction, 0, 7)
+	}
+	return s.register[getBitsRange32(instruction, 0, 3)]
+}
+
+func (s *CpuState) execArmMov(instruction uint32) {
+	rd := getBitsRange32(instruction, 12, 15)
+	operand2 := s.armGetOp2(instruction)
+	s.register[rd] = operand2
+}
+
 func (s *CpuState) execArmALU(instruction uint32) {
+	opcode := getBitsRange32(instruction, 21, 24)
+	switch opcode {
+	case 0x4:
+		s.execArmAdd(instruction)
+	case 0x13:
+		s.execArmMov(instruction)
+	}
 }
 
 func isArmBx(instruction uint32) bool {
@@ -36,6 +70,9 @@ func isArmBx(instruction uint32) bool {
 func (s *CpuState) execArmBx(instruction uint32) {
 	rn := getBitsRange32(instruction, 0, 3)
 	rnVal := s.register[rn]
+	if rn == pc {
+		rnVal = s.loc + 8
+	}
 
 	if rnVal&0x1 == 0 {
 		s.thumb = false
